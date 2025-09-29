@@ -120,11 +120,14 @@
 
     <script>
         // =====================================================================================
-        // ATENÇÃO: SUBSTITUA A URL ABAIXO PELA URL REAL DO SEU SERVIDOR QUE RODA O DOCUMENTOS.PHP
-        // Exemplo: 'https://suaempresa.com.br/api/documentos.php'
-        const API_URL = 'https://sua-url-real-do-servidor-php/documentos.php'; 
+        // ATENÇÃO: URL AJUSTADA PARA O ENDEREÇO IP PRIVADO (REDE LOCAL)
+        // ESSA CONSULTA SÓ FUNCIONARÁ SE O USUÁRIO ESTIVER CONECTADO NA MESMA REDE QUE O SERVIDOR.
+        const API_URL = 'http://192.168.1.241:8080/gestao_acervo/documentos.php'; 
         // =====================================================================================
 
+        // Variável global para armazenar os dados do documento para o QR Code
+        let documentsList = []; 
+        
         // Função para obter o ID da caixa da URL (e.g., consulta.html?id=123)
         function getCaixaIdFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -176,7 +179,7 @@
                     // Tenta ler o JSON de erro do PHP se possível, senão lança erro de rede.
                     const errorText = await response.text();
                     console.error("Resposta não OK:", errorText);
-                    throw new Error(`Erro de rede ou servidor: ${response.status}. Verifique o CORS e a URL da API.`);
+                    throw new Error(`Erro de rede ou servidor: ${response.status}. Verifique se o servidor (${API_URL}) está acessível e se o CORS está configurado no PHP.`);
                 }
                 
                 const result = await response.json();
@@ -212,7 +215,7 @@
 
             } catch (error) {
                 console.error("Erro na busca da caixa:", error);
-                showMessage("❌ Erro de conexão com a API. Verifique a constante API_URL no código e se o servidor PHP está ativo. Detalhes: " + error.message, true);
+                showMessage("❌ Erro de conexão com a API. Verifique a constante API_URL no código e se o servidor PHP está ativo na rede local. Detalhes: " + error.message, true);
             }
         }
 
