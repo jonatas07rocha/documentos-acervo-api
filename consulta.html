@@ -119,9 +119,11 @@
     </div>
 
     <script>
-        // Configuração da URL da sua API no servidor.
-        // É CRUCIAL SUBSTITUIR ESTA URL pela URL REAL onde seu 'documentos.php' está hospedado.
-        const API_URL = 'https://sua-url.com.br/documentos.php'; 
+        // =====================================================================================
+        // ATENÇÃO: SUBSTITUA A URL ABAIXO PELA URL REAL DO SEU SERVIDOR QUE RODA O DOCUMENTOS.PHP
+        // Exemplo: 'https://suaempresa.com.br/api/documentos.php'
+        const API_URL = 'https://sua-url-real-do-servidor-php/documentos.php'; 
+        // =====================================================================================
 
         // Função para obter o ID da caixa da URL (e.g., consulta.html?id=123)
         function getCaixaIdFromUrl() {
@@ -141,7 +143,7 @@
 
             messageDiv.textContent = text;
             if (isError) {
-                messageDiv.classList.remove('bg-red-100', 'text-red-700', 'border-red-300');
+                messageDiv.classList.remove('bg-green-100', 'text-green-700', 'border-green-300'); // Garante que a cor de erro prevaleça
                 messageDiv.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
             } else {
                 // Mensagem de sucesso (caso o design precise de uma)
@@ -165,10 +167,16 @@
             loadingDiv.classList.remove('hidden');
 
             try {
-                const response = await fetch(`${API_URL}?action=get_caixa_by_id&id=${caixaId}`);
+                // Monta a URL da API com o ID da caixa
+                const apiUrlWithId = `${API_URL}?action=get_caixa_by_id&id=${caixaId}`;
+                
+                const response = await fetch(apiUrlWithId);
                 
                 if (!response.ok) {
-                    throw new Error(`Erro de rede ou servidor: ${response.status}`);
+                    // Tenta ler o JSON de erro do PHP se possível, senão lança erro de rede.
+                    const errorText = await response.text();
+                    console.error("Resposta não OK:", errorText);
+                    throw new Error(`Erro de rede ou servidor: ${response.status}. Verifique o CORS e a URL da API.`);
                 }
                 
                 const result = await response.json();
@@ -184,7 +192,9 @@
 
                     // Preencher dados do documento (Temporalidade)
                     document.getElementById('doc-nome').textContent = data.document_name;
-                    document.getElementById('doc-retencao').textContent = data.retention_period + (data.retention_period > 1 ? ' Anos' : ' Ano');
+                    // Adiciona lógica simples para plural/singular
+                    const retencaoText = data.retention_period + (parseInt(data.retention_period) !== 1 ? ' Anos' : ' Ano');
+                    document.getElementById('doc-retencao').textContent = retencaoText;
                     document.getElementById('doc-destinacao').textContent = data.final_disposition;
 
                     // Configurar o botão de download de PDF
@@ -202,7 +212,7 @@
 
             } catch (error) {
                 console.error("Erro na busca da caixa:", error);
-                showMessage("Erro de conexão com a API. Verifique se a URL da API está correta e se o servidor está ativo. Detalhes: " + error.message, true);
+                showMessage("❌ Erro de conexão com a API. Verifique a constante API_URL no código e se o servidor PHP está ativo. Detalhes: " + error.message, true);
             }
         }
 
